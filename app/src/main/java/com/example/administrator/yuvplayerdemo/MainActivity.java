@@ -1,7 +1,12 @@
 package com.example.administrator.yuvplayerdemo;
 
+import android.Manifest;
 import android.app.Activity;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 
 import java.io.File;
@@ -11,13 +16,24 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 public class MainActivity extends Activity {
+    private static final String TAG = "jgl";
     private GLSurface mglsuface = null;
     private MyGLRender mrender = null;
-    int width = 640;
-    int height = 360;
+    int width = 320;
+    int height = 240;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED) {
+            Log.i(TAG, "requestPermissions");
+            // here, Permission is not granted
+            ActivityCompat.requestPermissions(this, new String[] {
+                    android.Manifest.permission.CAMERA,
+                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.READ_EXTERNAL_STORAGE }, 50);
+        } else if (savedInstanceState == null) {
+            Log.i(TAG, "onCreate");
+        }
         setContentView(R.layout.activity_main);
 
         mglsuface = (GLSurface)findViewById(R.id.preview);
@@ -29,8 +45,11 @@ public class MainActivity extends Activity {
             @Override
             public void run() {
                 super.run();
+                File sdcard = Environment.getExternalStorageDirectory();
+                final String fileName = sdcard + "/test.yuv";
+                Log.i("jgl", "file path" + fileName);
 
-                File yuvFile = new File("/sdcard/test.yuv");
+                File yuvFile = new File(fileName);
                 FileInputStream fis = null;
                 try {
                     fis   = new FileInputStream(yuvFile);
